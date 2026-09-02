@@ -7,13 +7,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0E3B2E">
 <title>Played.</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 :root{--turf:#0E3B2E;--turf2:#1B5442;--paper:#EDEDE7;--card:#F8F8F4;--sand:#D6CDB2;
  --flag:#B92E22;--ink:#16211C;--fade:#6D7A72;--rule:#CFD2C9;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
- -webkit-font-smoothing:antialiased;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
 button,input,textarea{font-family:inherit;}
 .num{font-family:'Archivo Narrow','Helvetica Neue',sans-serif;font-variant-numeric:tabular-nums;}
 header{background:var(--turf);color:#EDEDE7;padding:max(20px,env(safe-area-inset-top)) 16px 0;}
@@ -21,30 +22,26 @@ h1{font-family:'Archivo Narrow',sans-serif;font-weight:700;font-size:29px;margin
 h1 span{color:var(--sand);}
 .sub{font-size:12.5px;color:#9FB6AA;margin:5px 0 14px;}
 nav{display:flex;}
-nav button{flex:1;padding:11px 2px;border:0;background:none;color:#9FB6AA;font-size:13px;
- font-weight:500;border-bottom:3px solid transparent;}
+nav button{flex:1;padding:11px 2px;border:0;background:none;color:#9FB6AA;font-size:12.5px;font-weight:500;border-bottom:3px solid transparent;}
 nav button[data-on="1"]{color:#EDEDE7;border-bottom-color:var(--flag);}
 main{padding:16px 14px calc(48px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto;}
-.rankrow{display:flex;background:var(--card);border:1px solid var(--rule);margin-bottom:8px;
- width:100%;text-align:left;padding:0;}
-.rk{width:44px;flex:0 0 44px;background:var(--turf);color:var(--sand);display:flex;align-items:center;
- justify-content:center;font-family:'Archivo Narrow',sans-serif;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;}
+main.wide{padding:0;max-width:none;}
+.rankrow{display:flex;background:var(--card);border:1px solid var(--rule);margin-bottom:8px;width:100%;text-align:left;padding:0;}
+.rk{width:44px;flex:0 0 44px;background:var(--turf);color:var(--sand);display:flex;align-items:center;justify-content:center;
+ font-family:'Archivo Narrow',sans-serif;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;}
 .thumb{width:50px;flex:0 0 50px;object-fit:cover;}
 .rkinfo{flex:1;padding:10px 11px;min-width:0;}
 .rkname{font-size:14.5px;font-weight:600;line-height:1.2;display:block;}
 .rkmeta{font-size:11px;color:var(--fade);margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rkscore{width:48px;flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;
- border-left:1px solid var(--rule);}
+.rkscore{width:48px;flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px solid var(--rule);}
 .rkscore b{font-family:'Archivo Narrow',sans-serif;font-size:18px;font-weight:600;}
 .rkscore i{font-style:normal;font-size:9px;color:var(--fade);}
 .empty{padding:28px 18px;text-align:center;border:1px dashed var(--rule);background:var(--card);}
 .empty p{font-size:13.5px;color:var(--fade);margin:0 0 14px;line-height:1.5;}
 .cta{background:var(--turf);color:#EDEDE7;border:0;padding:13px 18px;font-size:14px;font-weight:600;width:100%;}
 .ghost{background:none;border:1px solid var(--rule);color:var(--fade);padding:10px 14px;font-size:12.5px;}
-.search{width:100%;padding:11px 12px;border:1px solid var(--rule);background:#fff;font-size:16px;
- margin-bottom:9px;color:var(--ink);}
-.pick{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--rule);
- border-bottom:0;padding:10px 11px;}
+.search{width:100%;padding:11px 12px;border:1px solid var(--rule);background:#fff;font-size:16px;margin-bottom:9px;color:var(--ink);}
+.pick{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--rule);border-bottom:0;padding:10px 11px;}
 .pick:last-of-type{border-bottom:1px solid var(--rule);}
 .pick b{display:block;font-size:14px;font-weight:600;}
 .pick span{display:block;font-size:11px;color:var(--fade);margin-top:2px;}
@@ -64,8 +61,7 @@ hr{border:0;border-top:1px solid var(--rule);margin:16px 0;}
 .crithint{font-size:11px;color:var(--fade);margin:1px 0 6px;}
 input[type=range]{width:100%;-webkit-appearance:none;appearance:none;background:none;height:24px;margin:0;}
 input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--sand);}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--turf);
- border-radius:50%;margin-top:-9px;border:3px solid var(--card);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--turf);border-radius:50%;margin-top:-9px;border:3px solid var(--card);}
 .line{width:100%;padding:10px;border:1px solid var(--rule);background:#fff;font-size:16px;color:var(--ink);}
 .count{font-size:10.5px;color:var(--fade);text-align:right;margin-top:3px;}
 .photos{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0;}
@@ -95,6 +91,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .h:first-child{margin-top:0;}
 .hsub{font-size:11.5px;color:var(--fade);margin:0 0 11px;line-height:1.5;}
 .foot{font-size:11px;color:var(--fade);line-height:1.5;margin-top:20px;border-top:1px solid var(--rule);padding-top:12px;}
+#map{width:100%;height:calc(100vh - 190px);background:#E8E8E4;}
+.mapnote{padding:10px 14px;font-size:11.5px;color:var(--fade);background:var(--card);border-bottom:1px solid var(--rule);}
+.pin{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;
+ background:var(--turf);color:var(--sand);border:2px solid var(--paper);font-family:'Archivo Narrow',sans-serif;
+ font-size:14px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.leaflet-popup-content{font-family:'IBM Plex Sans',sans-serif;font-size:13px;margin:10px 12px;}
+.leaflet-popup-content b{font-size:14px;}
+.leaflet-popup-content em{font-style:normal;color:var(--fade);display:block;margin-top:2px;font-size:11.5px;}
 </style>
 </head>
 <body>
@@ -103,6 +107,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
   <p class="sub" id="sub">Your ranking of every course you've played.</p>
   <nav>
     <button data-tab="rank" data-on="1">Ranking</button>
+    <button data-tab="map">Map</button>
     <button data-tab="add">Add</button>
     <button data-tab="data">Backup</button>
   </nav>
@@ -129,11 +134,9 @@ const DB = (() => {
       req.onerror = () => rej(req.error);
     });
   };
-  return {
-    get: (k) => tx("readonly", (s) => s.get(k)),
+  return { get: (k) => tx("readonly", (s) => s.get(k)),
     set: (k, v) => tx("readwrite", (s) => s.put(v, k)),
-    del: (k) => tx("readwrite", (s) => s.delete(k)),
-  };
+    del: (k) => tx("readwrite", (s) => s.delete(k)) };
 })();
 
 /* --------------------------------- model --------------------------------- */
@@ -151,62 +154,66 @@ const CONDS = [
   ["wind","Wind",["Calm","Breeze","Blowing","Brutal"]],
   ["mode","Round",["Walked","Caddie","Cart"]],
 ];
-/* Fallback list for offline or when OSM search is unavailable. */
 const LOCAL = [
-  ["Mount Bruno","Saint-Bruno, QC"],["Royal Montreal Blue","Île-Bizard, QC"],
-  ["Laval-sur-le-Lac Blue","Laval, QC"],["Beaconsfield","Pointe-Claire, QC"],
-  ["Kanawaki","Kahnawake, QC"],["Elm Ridge","Île-Bizard, QC"],
-  ["Summerlea Dorval","Vaudreuil-Dorion, QC"],["Whitlock","Hudson, QC"],
-  ["Pinegrove","Saint-Luc, QC"],["Royal Quebec","Boischatel, QC"],
-  ["Le Diable","Mont-Tremblant, QC"],["Le Maître","Mont-Tremblant, QC"],
-  ["Manoir Richelieu","La Malbaie, QC"],["Le Blainvillier","Blainville, QC"],
-  ["Owl's Head","Mansonville, QC"],["Carling Lake","Pine Hill, QC"],
-  ["St. George's G&CC","Toronto, ON"],["Hamilton G&CC","Ancaster, ON"],
-  ["Cabot Cliffs","Inverness, NS"],["Highlands Links","Ingonish Beach, NS"],
-  ["Capilano","West Vancouver, BC"],["Banff Springs","Banff, AB"],
-  ["National Golf Links","Southampton, NY"],["Shinnecock Hills","Southampton, NY"],
-  ["Winged Foot West","Mamaroneck, NY"],["Bethpage Black","Farmingdale, NY"],
-  ["Oak Hill East","Rochester, NY"],["Garden City Golf Club","Garden City, NY"],
-  ["Pine Valley","Clementon, NJ"],["Cypress Point","Pebble Beach, CA"],
-  ["Pebble Beach","Pebble Beach, CA"],["Pacific Dunes","Bandon, OR"],
-  ["The Old Course","St Andrews, Scotland"],["Royal County Down","Newcastle, N. Ireland"],
-].map((r,i) => ({ id:"L"+i, name:r[0], loc:r[1] }));
+  ["Mount Bruno","Saint-Bruno, QC",45.535,-73.348],
+  ["Royal Montreal","Île-Bizard, QC",45.494,-73.888],
+  ["Laval-sur-le-Lac","Laval, QC",45.539,-73.855],
+  ["Beaconsfield","Pointe-Claire, QC",45.457,-73.815],
+  ["Kanawaki","Kahnawake, QC",45.409,-73.717],
+  ["Elm Ridge","Île-Bizard, QC",45.489,-73.879],
+  ["Whitlock","Hudson, QC",45.442,-74.128],
+  ["Royal Quebec","Boischatel, QC",46.900,-71.147],
+  ["Le Diable","Mont-Tremblant, QC",46.191,-74.585],
+  ["Manoir Richelieu","La Malbaie, QC",47.633,-70.148],
+  ["St. George's G&CC","Toronto, ON",43.674,-79.532],
+  ["Hamilton G&CC","Ancaster, ON",43.226,-79.947],
+  ["Cabot Cliffs","Inverness, NS",46.221,-61.310],
+  ["Highlands Links","Ingonish Beach, NS",46.660,-60.383],
+  ["Banff Springs","Banff, AB",51.163,-115.549],
+  ["National Golf Links","Southampton, NY",40.907,-72.452],
+  ["Shinnecock Hills","Southampton, NY",40.897,-72.443],
+  ["Winged Foot","Mamaroneck, NY",40.958,-73.752],
+  ["Bethpage Black","Farmingdale, NY",40.744,-73.454],
+  ["Oak Hill","Rochester, NY",43.107,-77.577],
+  ["Pebble Beach","Pebble Beach, CA",36.568,-121.949],
+  ["Pacific Dunes","Bandon, OR",43.187,-124.393],
+  ["The Old Course","St Andrews, Scotland",56.343,-2.803],
+  ["Royal County Down","Newcastle, N. Ireland",54.220,-5.891],
+].map((r,i) => ({ id:"L"+i, name:r[0], loc:r[1], lat:r[2], lon:r[3] }));
 
-let S = { entries: {}, order: [] };   // entries[id] = {name,loc,arch,ratings,cond,review,thumb}
-let tab = "rank", view = null, flow = null, photos = [], searchTimer = null;
+let S = { entries: {}, order: [] };
+let tab = "rank", view = null, flow = null, photos = [], searchTimer = null, map = null;
 
 const save = () => DB.set("state", JSON.parse(JSON.stringify(S))).catch(console.error);
 const avg = (r) => CRITERIA.reduce((a,c) => a + r[c[0]], 0) / CRITERIA.length;
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ------------------------------ OSM search ------------------------------- */
-/* Nominatim is OpenStreetMap's free geocoder. Every golf course on earth that
-   anyone has mapped is in here. Fair-use policy: one request a second, which
-   the debounce below respects. Falls back to LOCAL if the network is unhappy. */
 async function searchOSM(q) {
   const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=25&q="
     + encodeURIComponent(q + " golf course");
   const r = await fetch(url, { headers: { "Accept-Language": "en" } });
   if (!r.ok) throw new Error("search failed");
   const j = await r.json();
-  return j.filter((x) => x.type === "golf_course" || /golf/i.test(x.display_name))
-    .map((x) => {
-      const parts = x.display_name.split(",").map((s) => s.trim());
-      return { id: "O" + x.osm_id, name: parts[0],
-        loc: parts.slice(1).filter((p) => !/^\d/.test(p)).slice(-3, -1).join(", ") || parts[1] || "" };
-    });
+  return j.filter((x) => x.type === "golf_course" || /golf/i.test(x.display_name)).map((x) => {
+    const parts = x.display_name.split(",").map((s) => s.trim());
+    return { id: "O" + x.osm_id, name: parts[0], lat: +x.lat, lon: +x.lon,
+      loc: parts.slice(1).filter((p) => !/^\d/.test(p)).slice(-3, -1).join(", ") || parts[1] || "" };
+  });
 }
 
 /* -------------------------------- render --------------------------------- */
 const main = document.getElementById("main");
 
 function render() {
+  if (map) { map.remove(); map = null; }
+  main.className = tab === "map" ? "wide" : "";
   document.getElementById("sub").textContent = S.order.length
     ? S.order.length + " course" + (S.order.length > 1 ? "s" : "") + " ranked"
     : "Your ranking of every course you've played.";
-  document.querySelectorAll("nav button").forEach((b) =>
-    b.dataset.on = b.dataset.tab === tab ? "1" : "0");
+  document.querySelectorAll("nav button").forEach((b) => b.dataset.on = b.dataset.tab === tab ? "1" : "0");
   if (tab === "rank") return view ? detail() : ranking();
+  if (tab === "map") return mapView();
   if (tab === "add") return flow ? (flow.step === "vs" ? compare() : rateStep()) : picker();
   return backup();
 }
@@ -226,8 +233,7 @@ function ranking() {
       ${e.thumb ? `<img class="thumb" src="${e.thumb}" alt="">` : ""}
       <span class="rkinfo"><span class="rkname">${esc(e.name)}</span>
         <span class="rkmeta">${esc(e.loc)}${e.arch ? " · " + esc(e.arch) : ""}</span></span>
-      <span class="rkscore"><b class="num">${avg(e.ratings).toFixed(1)}</b><i>score</i></span>
-    </button>`;
+      <span class="rkscore"><b class="num">${avg(e.ratings).toFixed(1)}</b><i>score</i></span></button>`;
   }).join("") + `<p class="foot">Rank comes from your head-to-head comparisons. The score is the
     average of your six marks — it explains the rank, it doesn't set it.</p>`;
   main.querySelectorAll(".rankrow").forEach((b) =>
@@ -235,6 +241,45 @@ function ranking() {
 }
 
 async function loadPhotos(id) { photos = (await DB.get("ph:" + id)) || []; }
+
+/* --------------------------------- map ----------------------------------- */
+function mapView() {
+  const pins = S.order.map((id, i) => ({ ...S.entries[id], id, rank: i + 1 }))
+    .filter((e) => typeof e.lat === "number" && typeof e.lon === "number");
+  const missing = S.order.length - pins.length;
+  if (typeof L === "undefined") {
+    main.className = "";
+    main.innerHTML = `<div class="empty"><p>The map library didn't load. This happens in preview
+      sandboxes that block outside scripts — open the app at its own address and it works.</p></div>`;
+    return;
+  }
+  if (!pins.length) {
+    main.className = "";
+    main.innerHTML = `<div class="empty"><p>No courses with a location yet. Courses you pick from the
+      search carry their coordinates; ones you type in by hand don't.</p></div>`;
+    return;
+  }
+  main.innerHTML = (missing ? `<div class="mapnote">${missing} course${missing > 1 ? "s aren't" : " isn't"}
+    shown — added by hand, so no coordinates.</div>` : "") + `<div id="map"></div>`;
+  map = L.map("map", { zoomControl: false }).setView([pins[0].lat, pins[0].lon], 5);
+  L.control.zoom({ position: "bottomright" }).addTo(map);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19, subdomains: "abcd",
+    attribution: "© OpenStreetMap · © CARTO" }).addTo(map);
+  const group = [];
+  pins.forEach((e) => {
+    const m = L.marker([e.lat, e.lon], {
+      icon: L.divIcon({ className: "", html: `<div class="pin">${e.rank}</div>`,
+        iconSize: [28, 28], iconAnchor: [14, 14] })
+    }).addTo(map);
+    m.bindPopup(`<b>${esc(e.name)}</b><em>${esc(e.loc)}</em>
+      <em>Your #${e.rank} · scored ${avg(e.ratings).toFixed(1)}</em>`);
+    m.on("click", () => { });
+    group.push(m);
+  });
+  map.fitBounds(L.featureGroup(group).getBounds().pad(0.25));
+  setTimeout(() => map.invalidateSize(), 150);
+}
 
 function detail() {
   const e = S.entries[view], pos = S.order.indexOf(view) + 1;
@@ -260,20 +305,21 @@ function picker() {
   main.innerHTML = `<input class="search" id="q" placeholder="Search any course in the world"
       autocomplete="off" value="${esc(picker.q || "")}">
     <div id="results"></div>
-    <p class="foot">Search runs against OpenStreetMap, so anything anyone has mapped is findable.
-      If nothing comes back, type the name and add it yourself.</p>`;
-  const q = document.getElementById("q");
-  const out = document.getElementById("results");
+    <p class="foot">Search runs against OpenStreetMap, so anything anyone has mapped is findable —
+      and it brings the coordinates with it, which is what puts the pin on your map.</p>`;
+  const q = document.getElementById("q"), out = document.getElementById("results");
+  const played = new Set(Object.values(S.entries).map((e) => e.name));
   const show = (list, note) => {
     out.innerHTML = (note ? `<p class="status">${note}</p>` : "")
-      + list.map((c) => `<button class="pick" data-n="${esc(c.name)}" data-l="${esc(c.loc)}">
-          <b>${esc(c.name)}</b><span>${esc(c.loc)}</span></button>`).join("")
-      + (q.value.trim() ? `<button class="pick" data-n="${esc(q.value.trim())}" data-l="Added by you">
-          <b>Add "${esc(q.value.trim())}"</b><span>Not found — log it anyway</span></button>` : "");
-    out.querySelectorAll(".pick").forEach((b) =>
-      b.onclick = () => startFlow(b.dataset.n, b.dataset.l));
+      + list.map((c, i) => `<button class="pick" data-i="${i}"><b>${esc(c.name)}</b>
+          <span>${esc(c.loc)}</span></button>`).join("")
+      + (q.value.trim() ? `<button class="pick" data-manual="1"><b>Add "${esc(q.value.trim())}"</b>
+          <span>Not found — log it anyway, no map pin</span></button>` : "");
+    out.querySelectorAll(".pick").forEach((b) => b.onclick = () => {
+      if (b.dataset.manual) return startFlow({ name: q.value.trim(), loc: "Added by you" });
+      startFlow(list[+b.dataset.i]);
+    });
   };
-  const played = new Set(Object.values(S.entries).map((e) => e.name));
   show(LOCAL.filter((c) => !played.has(c.name)).slice(0, 8));
   q.oninput = () => {
     picker.q = q.value;
@@ -284,8 +330,7 @@ function picker() {
     searchTimer = setTimeout(async () => {
       try {
         const hits = await searchOSM(t);
-        show(hits.filter((c) => !played.has(c.name)),
-          hits.length ? null : "Nothing in OpenStreetMap matched.");
+        show(hits.filter((c) => !played.has(c.name)), hits.length ? null : "Nothing in OpenStreetMap matched.");
       } catch (err) {
         show(LOCAL.filter((c) => c.name.toLowerCase().includes(t.toLowerCase())),
           "Couldn't reach OpenStreetMap — showing the built-in list.");
@@ -295,9 +340,9 @@ function picker() {
   q.focus();
 }
 
-function startFlow(name, loc) {
-  flow = { id: "e" + Date.now(), name, loc, arch: "",
-    ratings: Object.fromEntries(CRITERIA.map((c) => [c[0], 6])),
+function startFlow(c) {
+  flow = { id: "e" + Date.now(), name: c.name, loc: c.loc, lat: c.lat, lon: c.lon, arch: "",
+    ratings: Object.fromEntries(CRITERIA.map((x) => [x[0], 6])),
     cond: { tees: "Member", season: "Summer", wind: "Breeze", mode: "Walked" },
     review: "", pics: [], lo: 0, hi: S.order.length, asked: 0, step: "rate" };
   picker.q = ""; render();
@@ -306,7 +351,7 @@ function startFlow(name, loc) {
 function rateStep() {
   main.innerHTML = `<div class="step">
     <h2 class="stepname">${esc(flow.name)}</h2>
-    <p class="steploc">${esc(flow.loc)}</p>
+    <p class="steploc">${esc(flow.loc)}${flow.lat ? "" : " · no map pin"}</p>
     <p class="condlab">Architect (optional)</p>
     <input class="line" id="arch" placeholder="Who built it" value="${esc(flow.arch)}">
     <hr>
@@ -322,28 +367,22 @@ function rateStep() {
     <hr>
     <input class="line" id="rev" maxlength="120" placeholder="One line you'll want to remember" value="${esc(flow.review)}">
     <div class="count" id="cnt">${120 - flow.review.length}</div>
-    <div class="photos" id="pics">
-      ${flow.pics.map((p) => `<img src="${p}" alt="">`).join("")}
-      ${flow.pics.length < 6 ? `<button class="addphoto" id="addp" aria-label="Add photo">+</button>` : ""}
-    </div>
+    <div class="photos">${flow.pics.map((p) => `<img src="${p}" alt="">`).join("")}
+      ${flow.pics.length < 6 ? `<button class="addphoto" id="addp" aria-label="Add photo">+</button>` : ""}</div>
     <input type="file" accept="image/*" id="file" style="display:none">
     <div class="acts"><button class="ghost" id="cancel">Cancel</button>
-      <button class="cta" id="next">${S.order.length ? "Place it" : "Save"}</button></div>
-  </div>`;
+      <button class="cta" id="next">${S.order.length ? "Place it" : "Save"}</button></div></div>`;
   main.querySelectorAll("input[type=range]").forEach((r) => r.oninput = () => {
     flow.ratings[r.dataset.k] = +r.value;
     document.getElementById("v-" + r.dataset.k).textContent = r.value;
   });
   main.querySelectorAll(".chips").forEach((g) => g.querySelectorAll(".chip").forEach((b) =>
-    b.onclick = () => {
-      flow.cond[g.dataset.c] = b.dataset.o;
-      g.querySelectorAll(".chip").forEach((x) => x.dataset.on = x === b ? "1" : "0");
-    }));
+    b.onclick = () => { flow.cond[g.dataset.c] = b.dataset.o;
+      g.querySelectorAll(".chip").forEach((x) => x.dataset.on = x === b ? "1" : "0"); }));
   const rev = document.getElementById("rev");
   rev.oninput = () => { flow.review = rev.value; document.getElementById("cnt").textContent = 120 - rev.value.length; };
   document.getElementById("arch").oninput = (e) => flow.arch = e.target.value;
-  const file = document.getElementById("file");
-  const addp = document.getElementById("addp");
+  const file = document.getElementById("file"), addp = document.getElementById("addp");
   if (addp) addp.onclick = () => file.click();
   file.onchange = () => {
     const f = file.files[0]; if (!f) return;
@@ -372,8 +411,7 @@ function shrink(src, px, quality, cb) {
 function compare() {
   const mid = Math.floor((flow.lo + flow.hi) / 2), other = S.entries[S.order[mid]];
   const depth = Math.ceil(Math.log2(S.order.length + 1));
-  main.innerHTML = `<div class="vs">
-    <p class="vsq">Which is the better golf course?</p>
+  main.innerHTML = `<div class="vs"><p class="vsq">Which is the better golf course?</p>
     <p class="vsn">Comparison ${flow.asked + 1} of about ${depth}</p>
     <button class="opt" id="a"><b>${esc(flow.name)}</b><span>${esc(flow.loc)}</span></button>
     <div class="or">or</div>
@@ -391,8 +429,8 @@ function compare() {
 
 function commit(pos) {
   const finish = (thumb) => {
-    S.entries[flow.id] = { name: flow.name, loc: flow.loc, arch: flow.arch,
-      ratings: flow.ratings, cond: flow.cond, review: flow.review, thumb };
+    S.entries[flow.id] = { name: flow.name, loc: flow.loc, lat: flow.lat, lon: flow.lon,
+      arch: flow.arch, ratings: flow.ratings, cond: flow.cond, review: flow.review, thumb };
     S.order.splice(pos, 0, flow.id);
     if (flow.pics.length) DB.set("ph:" + flow.id, flow.pics);
     save();
@@ -405,15 +443,14 @@ function commit(pos) {
 function backup() {
   main.innerHTML = `<h2 class="h">This lives on your phone</h2>
     <p class="hsub">Nothing is sent anywhere. That also means nothing is backed up. Clearing your
-      browser data, or losing the phone, loses the lot. Export every few months and email the file
-      to yourself.</p>
+      browser data, or losing the phone, loses the lot. Export every few months and email the file to yourself.</p>
     <button class="cta" id="exp">Export everything</button>
     <h2 class="h">Restore</h2>
     <p class="hsub">Loading a backup replaces what's here now.</p>
     <button class="ghost" id="impb" style="width:100%">Choose a backup file</button>
     <input type="file" accept="application/json" id="imp" style="display:none">
-    <p class="foot">Course search uses OpenStreetMap under the ODbL licence. ${S.order.length} courses
-      ranked${photosNote()}.</p>`;
+    <p class="foot">Map tiles and course search from OpenStreetMap, © OpenStreetMap contributors,
+      ODbL. ${S.order.length} courses ranked.</p>`;
   document.getElementById("exp").onclick = exportAll;
   document.getElementById("impb").onclick = () => document.getElementById("imp").click();
   document.getElementById("imp").onchange = (e) => {
@@ -430,7 +467,6 @@ function backup() {
     rd.readAsText(f);
   };
 }
-function photosNote() { return ""; }
 
 async function exportAll() {
   const photosOut = {};
@@ -443,11 +479,9 @@ async function exportAll() {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "played-" + new Date().toISOString().slice(0, 10) + ".json";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
-/* --------------------------------- boot ---------------------------------- */
 document.querySelectorAll("nav button").forEach((b) =>
   b.onclick = () => { tab = b.dataset.tab; view = null; flow = null; render(); });
 

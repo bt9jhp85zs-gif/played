@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0E3B2E">
+<title>Played.</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+:root{--turf:#0E3B2E;--turf2:#1B5442;--paper:#EDEDE7;--card:#F8F8F4;--sand:#D6CDB2;
+ --flag:#B92E22;--ink:#16211C;--fade:#6D7A72;--rule:#CFD2C9;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+ -webkit-font-smoothing:antialiased;}
+button,input,textarea{font-family:inherit;}
+.num{font-family:'Archivo Narrow','Helvetica Neue',sans-serif;font-variant-numeric:tabular-nums;}
+header{background:var(--turf);color:#EDEDE7;padding:max(20px,env(safe-area-inset-top)) 16px 0;}
+h1{font-family:'Archivo Narrow',sans-serif;font-weight:700;font-size:29px;margin:0;line-height:1;}
+h1 span{color:var(--sand);}
+.sub{font-size:12.5px;color:#9FB6AA;margin:5px 0 14px;}
+nav{display:flex;}
+nav button{flex:1;padding:11px 2px;border:0;background:none;color:#9FB6AA;font-size:13px;
+ font-weight:500;border-bottom:3px solid transparent;}
+nav button[data-on="1"]{color:#EDEDE7;border-bottom-color:var(--flag);}
+main{padding:16px 14px calc(48px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto;}
+.rankrow{display:flex;background:var(--card);border:1px solid var(--rule);margin-bottom:8px;
+ width:100%;text-align:left;padding:0;}
+.rk{width:44px;flex:0 0 44px;background:var(--turf);color:var(--sand);display:flex;align-items:center;
+ justify-content:center;font-family:'Archivo Narrow',sans-serif;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;}
+.thumb{width:50px;flex:0 0 50px;object-fit:cover;}
+.rkinfo{flex:1;padding:10px 11px;min-width:0;}
+.rkname{font-size:14.5px;font-weight:600;line-height:1.2;display:block;}
+.rkmeta{font-size:11px;color:var(--fade);margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rkscore{width:48px;flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ border-left:1px solid var(--rule);}
+.rkscore b{font-family:'Archivo Narrow',sans-serif;font-size:18px;font-weight:600;}
+.rkscore i{font-style:normal;font-size:9px;color:var(--fade);}
+.empty{padding:28px 18px;text-align:center;border:1px dashed var(--rule);background:var(--card);}
+.empty p{font-size:13.5px;color:var(--fade);margin:0 0 14px;line-height:1.5;}
+.cta{background:var(--turf);color:#EDEDE7;border:0;padding:13px 18px;font-size:14px;font-weight:600;width:100%;}
+.ghost{background:none;border:1px solid var(--rule);color:var(--fade);padding:10px 14px;font-size:12.5px;}
+.search{width:100%;padding:11px 12px;border:1px solid var(--rule);background:#fff;font-size:16px;
+ margin-bottom:9px;color:var(--ink);}
+.pick{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--rule);
+ border-bottom:0;padding:10px 11px;}
+.pick:last-of-type{border-bottom:1px solid var(--rule);}
+.pick b{display:block;font-size:14px;font-weight:600;}
+.pick span{display:block;font-size:11px;color:var(--fade);margin-top:2px;}
+.status{font-size:11.5px;color:var(--fade);padding:8px 0;}
+.step{background:var(--card);border:1px solid var(--rule);padding:15px 13px;}
+.stepname{font-family:'Archivo Narrow',sans-serif;font-size:21px;font-weight:600;margin:0;line-height:1.1;}
+.steploc{font-size:12px;color:var(--fade);margin:3px 0 14px;}
+.condlab{font-size:11px;color:var(--fade);margin:0 0 4px;}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.chip{border:1px solid var(--rule);background:#fff;padding:6px 10px;font-size:12px;color:var(--fade);}
+.chip[data-on="1"]{background:var(--turf);border-color:var(--turf);color:#EDEDE7;}
+hr{border:0;border-top:1px solid var(--rule);margin:16px 0;}
+.crit{margin-bottom:13px;}
+.critline{display:flex;justify-content:space-between;align-items:baseline;}
+.critlabel{font-size:13.5px;font-weight:500;}
+.critval{font-family:'Archivo Narrow',sans-serif;font-size:17px;font-weight:600;}
+.crithint{font-size:11px;color:var(--fade);margin:1px 0 6px;}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;background:none;height:24px;margin:0;}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--sand);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--turf);
+ border-radius:50%;margin-top:-9px;border:3px solid var(--card);}
+.line{width:100%;padding:10px;border:1px solid var(--rule);background:#fff;font-size:16px;color:var(--ink);}
+.count{font-size:10.5px;color:var(--fade);text-align:right;margin-top:3px;}
+.photos{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0;}
+.photos img{width:70px;height:70px;object-fit:cover;}
+.addphoto{width:70px;height:70px;border:1px dashed #A9B0A6;background:none;color:var(--fade);font-size:21px;}
+.strip{display:flex;gap:6px;overflow-x:auto;margin:0 -14px 14px;padding:0 14px;}
+.strip img{height:150px;flex:0 0 auto;}
+.acts{display:flex;gap:8px;margin-top:16px;} .acts button{flex:1;}
+.vs{text-align:center;padding:6px 0 18px;}
+.vsq{font-size:14.5px;font-weight:600;margin:0 0 4px;}
+.vsn{font-size:11.5px;color:var(--fade);margin:0 0 16px;}
+.opt{display:block;width:100%;background:var(--card);border:1px solid var(--rule);padding:18px 14px;text-align:center;}
+.opt b{display:block;font-family:'Archivo Narrow',sans-serif;font-size:20px;font-weight:600;line-height:1.15;}
+.opt span{display:block;font-size:11.5px;color:var(--fade);margin-top:4px;}
+.or{font-family:'Archivo Narrow',sans-serif;font-size:12px;color:var(--fade);padding:9px 0;}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.dtitle{font-family:'Archivo Narrow',sans-serif;font-size:25px;font-weight:600;margin:0;line-height:1.05;}
+.drank{font-family:'Archivo Narrow',sans-serif;font-size:30px;font-weight:700;color:var(--turf);line-height:1;}
+.dloc{font-size:12.5px;color:var(--fade);margin:4px 0 14px;}
+.bl{margin-bottom:8px;}
+.blline{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;}
+.blbar{height:6px;background:var(--sand);} .blfill{height:100%;background:var(--turf);}
+.note{font-size:13.5px;line-height:1.5;background:var(--card);border-left:3px solid var(--sand);padding:11px 12px;margin:14px 0;}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:12px 0;}
+.tag{font-size:11px;border:1px solid var(--rule);padding:4px 8px;color:var(--fade);}
+.h{font-family:'Archivo Narrow',sans-serif;font-size:14px;font-weight:600;margin:22px 0 3px;}
+.h:first-child{margin-top:0;}
+.hsub{font-size:11.5px;color:var(--fade);margin:0 0 11px;line-height:1.5;}
+.foot{font-size:11px;color:var(--fade);line-height:1.5;margin-top:20px;border-top:1px solid var(--rule);padding-top:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Played<span>.</span></h1>
+  <p class="sub" id="sub">Your ranking of every course you've played.</p>
+  <nav>
+    <button data-tab="rank" data-on="1">Ranking</button>
+    <button data-tab="add">Add</button>
+    <button data-tab="data">Backup</button>
+  </nav>
+</header>
+<main id="main"></main>
+
+<script>
+/* ------------------------------- storage --------------------------------- */
+const DB = (() => {
+  let db;
+  const open = () => new Promise((res, rej) => {
+    if (db) return res(db);
+    const r = indexedDB.open("played", 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore("kv"); };
+    r.onsuccess = () => { db = r.result; res(db); };
+    r.onerror = () => rej(r.error);
+  });
+  const tx = async (mode, fn) => {
+    const d = await open();
+    return new Promise((res, rej) => {
+      const t = d.transaction("kv", mode), s = t.objectStore("kv");
+      const req = fn(s);
+      req.onsuccess = () => res(req.result);
+      req.onerror = () => rej(req.error);
+    });
+  };
+  return {
+    get: (k) => tx("readonly", (s) => s.get(k)),
+    set: (k, v) => tx("readwrite", (s) => s.put(v, k)),
+    del: (k) => tx("readwrite", (s) => s.delete(k)),
+  };
+})();
+
+/* --------------------------------- model --------------------------------- */
+const CRITERIA = [
+  ["routing","Routing","How the holes flow across the land"],
+  ["greens","Green complexes","Contour, surrounds, recovery"],
+  ["variety","Shot variety","Does it ask different questions"],
+  ["unique","Distinctiveness","Could this be anywhere else"],
+  ["setting","Setting","Land, views, atmosphere"],
+  ["cond","Conditioning","The day you played — weight it lightly"],
+];
+const CONDS = [
+  ["tees","Tees",["Forward","Member","Back","Tips"]],
+  ["season","Season",["Spring","Summer","Autumn","Winter"]],
+  ["wind","Wind",["Calm","Breeze","Blowing","Brutal"]],
+  ["mode","Round",["Walked","Caddie","Cart"]],
+];
+/* Fallback list for offline or when OSM search is unavailable. */
+const LOCAL = [
+  ["Mount Bruno","Saint-Bruno, QC"],["Royal Montreal Blue","Île-Bizard, QC"],
+  ["Laval-sur-le-Lac Blue","Laval, QC"],["Beaconsfield","Pointe-Claire, QC"],
+  ["Kanawaki","Kahnawake, QC"],["Elm Ridge","Île-Bizard, QC"],
+  ["Summerlea Dorval","Vaudreuil-Dorion, QC"],["Whitlock","Hudson, QC"],
+  ["Pinegrove","Saint-Luc, QC"],["Royal Quebec","Boischatel, QC"],
+  ["Le Diable","Mont-Tremblant, QC"],["Le Maître","Mont-Tremblant, QC"],
+  ["Manoir Richelieu","La Malbaie, QC"],["Le Blainvillier","Blainville, QC"],
+  ["Owl's Head","Mansonville, QC"],["Carling Lake","Pine Hill, QC"],
+  ["St. George's G&CC","Toronto, ON"],["Hamilton G&CC","Ancaster, ON"],
+  ["Cabot Cliffs","Inverness, NS"],["Highlands Links","Ingonish Beach, NS"],
+  ["Capilano","West Vancouver, BC"],["Banff Springs","Banff, AB"],
+  ["National Golf Links","Southampton, NY"],["Shinnecock Hills","Southampton, NY"],
+  ["Winged Foot West","Mamaroneck, NY"],["Bethpage Black","Farmingdale, NY"],
+  ["Oak Hill East","Rochester, NY"],["Garden City Golf Club","Garden City, NY"],
+  ["Pine Valley","Clementon, NJ"],["Cypress Point","Pebble Beach, CA"],
+  ["Pebble Beach","Pebble Beach, CA"],["Pacific Dunes","Bandon, OR"],
+  ["The Old Course","St Andrews, Scotland"],["Royal County Down","Newcastle, N. Ireland"],
+].map((r,i) => ({ id:"L"+i, name:r[0], loc:r[1] }));
+
+let S = { entries: {}, order: [] };   // entries[id] = {name,loc,arch,ratings,cond,review,thumb}
+let tab = "rank", view = null, flow = null, photos = [], searchTimer = null;
+
+const save = () => DB.set("state", JSON.parse(JSON.stringify(S))).catch(console.error);
+const avg = (r) => CRITERIA.reduce((a,c) => a + r[c[0]], 0) / CRITERIA.length;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ------------------------------ OSM search ------------------------------- */
+/* Nominatim is OpenStreetMap's free geocoder. Every golf course on earth that
+   anyone has mapped is in here. Fair-use policy: one request a second, which
+   the debounce below respects. Falls back to LOCAL if the network is unhappy. */
+async function searchOSM(q) {
+  const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=25&q="
+    + encodeURIComponent(q + " golf course");
+  const r = await fetch(url, { headers: { "Accept-Language": "en" } });
+  if (!r.ok) throw new Error("search failed");
+  const j = await r.json();
+  return j.filter((x) => x.type === "golf_course" || /golf/i.test(x.display_name))
+    .map((x) => {
+      const parts = x.display_name.split(",").map((s) => s.trim());
+      return { id: "O" + x.osm_id, name: parts[0],
+        loc: parts.slice(1).filter((p) => !/^\d/.test(p)).slice(-3, -1).join(", ") || parts[1] || "" };
+    });
+}
+
+/* -------------------------------- render --------------------------------- */
+const main = document.getElementById("main");
+
+function render() {
+  document.getElementById("sub").textContent = S.order.length
+    ? S.order.length + " course" + (S.order.length > 1 ? "s" : "") + " ranked"
+    : "Your ranking of every course you've played.";
+  document.querySelectorAll("nav button").forEach((b) =>
+    b.dataset.on = b.dataset.tab === tab ? "1" : "0");
+  if (tab === "rank") return view ? detail() : ranking();
+  if (tab === "add") return flow ? (flow.step === "vs" ? compare() : rateStep()) : picker();
+  return backup();
+}
+
+function ranking() {
+  if (!S.order.length) {
+    main.innerHTML = `<div class="empty"><p>Nothing ranked yet. Add the last course you played —
+      it becomes number one, and everything after gets compared against it.</p>
+      <button class="cta" id="first">Add your first course</button></div>`;
+    document.getElementById("first").onclick = () => { tab = "add"; render(); };
+    return;
+  }
+  main.innerHTML = S.order.map((id, i) => {
+    const e = S.entries[id];
+    return `<button class="rankrow" data-id="${id}">
+      <span class="rk num">${i + 1}</span>
+      ${e.thumb ? `<img class="thumb" src="${e.thumb}" alt="">` : ""}
+      <span class="rkinfo"><span class="rkname">${esc(e.name)}</span>
+        <span class="rkmeta">${esc(e.loc)}${e.arch ? " · " + esc(e.arch) : ""}</span></span>
+      <span class="rkscore"><b class="num">${avg(e.ratings).toFixed(1)}</b><i>score</i></span>
+    </button>`;
+  }).join("") + `<p class="foot">Rank comes from your head-to-head comparisons. The score is the
+    average of your six marks — it explains the rank, it doesn't set it.</p>`;
+  main.querySelectorAll(".rankrow").forEach((b) =>
+    b.onclick = () => { view = b.dataset.id; loadPhotos(view).then(render); });
+}
+
+async function loadPhotos(id) { photos = (await DB.get("ph:" + id)) || []; }
+
+function detail() {
+  const e = S.entries[view], pos = S.order.indexOf(view) + 1;
+  main.innerHTML = `<button class="ghost" id="back" style="margin-bottom:14px">← Ranking</button>
+    ${photos.length ? `<div class="strip">${photos.map((p) => `<img src="${p}" alt="">`).join("")}</div>` : ""}
+    <div class="dh"><h2 class="dtitle">${esc(e.name)}</h2><span class="drank num">#${pos}</span></div>
+    <p class="dloc">${esc(e.loc)}${e.arch ? " · " + esc(e.arch) : ""} · you scored it ${avg(e.ratings).toFixed(1)}</p>
+    <div class="tags">${CONDS.map((c) => `<span class="tag">${esc(e.cond[c[0]])}</span>`).join("")}</div>
+    ${CRITERIA.map((c) => `<div class="bl"><div class="blline"><span>${c[1]}</span>
+      <span class="num">${e.ratings[c[0]]}</span></div>
+      <div class="blbar"><div class="blfill" style="width:${e.ratings[c[0]] * 10}%"></div></div></div>`).join("")}
+    ${e.review ? `<p class="note">${esc(e.review)}</p>` : ""}
+    <div class="acts"><button class="ghost" id="del" style="color:var(--flag)">Remove</button></div>`;
+  document.getElementById("back").onclick = () => { view = null; render(); };
+  document.getElementById("del").onclick = () => {
+    delete S.entries[view];
+    S.order = S.order.filter((x) => x !== view);
+    DB.del("ph:" + view); save(); view = null; render();
+  };
+}
+
+function picker() {
+  main.innerHTML = `<input class="search" id="q" placeholder="Search any course in the world"
+      autocomplete="off" value="${esc(picker.q || "")}">
+    <div id="results"></div>
+    <p class="foot">Search runs against OpenStreetMap, so anything anyone has mapped is findable.
+      If nothing comes back, type the name and add it yourself.</p>`;
+  const q = document.getElementById("q");
+  const out = document.getElementById("results");
+  const show = (list, note) => {
+    out.innerHTML = (note ? `<p class="status">${note}</p>` : "")
+      + list.map((c) => `<button class="pick" data-n="${esc(c.name)}" data-l="${esc(c.loc)}">
+          <b>${esc(c.name)}</b><span>${esc(c.loc)}</span></button>`).join("")
+      + (q.value.trim() ? `<button class="pick" data-n="${esc(q.value.trim())}" data-l="Added by you">
+          <b>Add "${esc(q.value.trim())}"</b><span>Not found — log it anyway</span></button>` : "");
+    out.querySelectorAll(".pick").forEach((b) =>
+      b.onclick = () => startFlow(b.dataset.n, b.dataset.l));
+  };
+  const played = new Set(Object.values(S.entries).map((e) => e.name));
+  show(LOCAL.filter((c) => !played.has(c.name)).slice(0, 8));
+  q.oninput = () => {
+    picker.q = q.value;
+    clearTimeout(searchTimer);
+    const t = q.value.trim();
+    if (t.length < 3) return show(LOCAL.filter((c) => !played.has(c.name)).slice(0, 8));
+    out.innerHTML = `<p class="status">Searching…</p>`;
+    searchTimer = setTimeout(async () => {
+      try {
+        const hits = await searchOSM(t);
+        show(hits.filter((c) => !played.has(c.name)),
+          hits.length ? null : "Nothing in OpenStreetMap matched.");
+      } catch (err) {
+        show(LOCAL.filter((c) => c.name.toLowerCase().includes(t.toLowerCase())),
+          "Couldn't reach OpenStreetMap — showing the built-in list.");
+      }
+    }, 900);
+  };
+  q.focus();
+}
+
+function startFlow(name, loc) {
+  flow = { id: "e" + Date.now(), name, loc, arch: "",
+    ratings: Object.fromEntries(CRITERIA.map((c) => [c[0], 6])),
+    cond: { tees: "Member", season: "Summer", wind: "Breeze", mode: "Walked" },
+    review: "", pics: [], lo: 0, hi: S.order.length, asked: 0, step: "rate" };
+  picker.q = ""; render();
+}
+
+function rateStep() {
+  main.innerHTML = `<div class="step">
+    <h2 class="stepname">${esc(flow.name)}</h2>
+    <p class="steploc">${esc(flow.loc)}</p>
+    <p class="condlab">Architect (optional)</p>
+    <input class="line" id="arch" placeholder="Who built it" value="${esc(flow.arch)}">
+    <hr>
+    ${CONDS.map((c) => `<p class="condlab">${c[1]}</p><div class="chips" data-c="${c[0]}">
+      ${c[2].map((o) => `<button class="chip" data-o="${o}" data-on="${flow.cond[c[0]] === o ? 1 : 0}">${o}</button>`).join("")}
+      </div>`).join("")}
+    <hr>
+    ${CRITERIA.map((c) => `<div class="crit"><div class="critline">
+      <span class="critlabel">${c[1]}</span><span class="critval num" id="v-${c[0]}">${flow.ratings[c[0]]}</span></div>
+      <p class="crithint">${c[2]}</p>
+      <input type="range" min="1" max="10" value="${flow.ratings[c[0]]}" data-k="${c[0]}" aria-label="${c[1]}">
+      </div>`).join("")}
+    <hr>
+    <input class="line" id="rev" maxlength="120" placeholder="One line you'll want to remember" value="${esc(flow.review)}">
+    <div class="count" id="cnt">${120 - flow.review.length}</div>
+    <div class="photos" id="pics">
+      ${flow.pics.map((p) => `<img src="${p}" alt="">`).join("")}
+      ${flow.pics.length < 6 ? `<button class="addphoto" id="addp" aria-label="Add photo">+</button>` : ""}
+    </div>
+    <input type="file" accept="image/*" id="file" style="display:none">
+    <div class="acts"><button class="ghost" id="cancel">Cancel</button>
+      <button class="cta" id="next">${S.order.length ? "Place it" : "Save"}</button></div>
+  </div>`;
+  main.querySelectorAll("input[type=range]").forEach((r) => r.oninput = () => {
+    flow.ratings[r.dataset.k] = +r.value;
+    document.getElementById("v-" + r.dataset.k).textContent = r.value;
+  });
+  main.querySelectorAll(".chips").forEach((g) => g.querySelectorAll(".chip").forEach((b) =>
+    b.onclick = () => {
+      flow.cond[g.dataset.c] = b.dataset.o;
+      g.querySelectorAll(".chip").forEach((x) => x.dataset.on = x === b ? "1" : "0");
+    }));
+  const rev = document.getElementById("rev");
+  rev.oninput = () => { flow.review = rev.value; document.getElementById("cnt").textContent = 120 - rev.value.length; };
+  document.getElementById("arch").oninput = (e) => flow.arch = e.target.value;
+  const file = document.getElementById("file");
+  const addp = document.getElementById("addp");
+  if (addp) addp.onclick = () => file.click();
+  file.onchange = () => {
+    const f = file.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => shrink(rd.result, 1000, 0.7, (big) => { flow.pics.push(big); render(); });
+    rd.readAsDataURL(f); file.value = "";
+  };
+  document.getElementById("cancel").onclick = () => { flow = null; render(); };
+  document.getElementById("next").onclick = () => {
+    if (!S.order.length) return commit(0);
+    flow.step = "vs"; render();
+  };
+}
+
+function shrink(src, px, quality, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const w = Math.min(px, img.width), h = Math.round((img.height / img.width) * w);
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    cv.getContext("2d").drawImage(img, 0, 0, w, h);
+    cb(cv.toDataURL("image/jpeg", quality));
+  };
+  img.src = src;
+}
+
+function compare() {
+  const mid = Math.floor((flow.lo + flow.hi) / 2), other = S.entries[S.order[mid]];
+  const depth = Math.ceil(Math.log2(S.order.length + 1));
+  main.innerHTML = `<div class="vs">
+    <p class="vsq">Which is the better golf course?</p>
+    <p class="vsn">Comparison ${flow.asked + 1} of about ${depth}</p>
+    <button class="opt" id="a"><b>${esc(flow.name)}</b><span>${esc(flow.loc)}</span></button>
+    <div class="or">or</div>
+    <button class="opt" id="b"><b>${esc(other.name)}</b>
+      <span>${esc(other.loc)} · your #${mid + 1}</span></button></div>`;
+  const answer = (better) => {
+    if (better) flow.hi = mid; else flow.lo = mid + 1;
+    flow.asked++;
+    if (flow.lo >= flow.hi) return commit(flow.lo);
+    render();
+  };
+  document.getElementById("a").onclick = () => answer(true);
+  document.getElementById("b").onclick = () => answer(false);
+}
+
+function commit(pos) {
+  const finish = (thumb) => {
+    S.entries[flow.id] = { name: flow.name, loc: flow.loc, arch: flow.arch,
+      ratings: flow.ratings, cond: flow.cond, review: flow.review, thumb };
+    S.order.splice(pos, 0, flow.id);
+    if (flow.pics.length) DB.set("ph:" + flow.id, flow.pics);
+    save();
+    view = flow.id; photos = flow.pics; flow = null; tab = "rank"; render();
+  };
+  if (flow.pics.length) shrink(flow.pics[0], 150, 0.5, finish); else finish(null);
+}
+
+/* -------------------------------- backup --------------------------------- */
+function backup() {
+  main.innerHTML = `<h2 class="h">This lives on your phone</h2>
+    <p class="hsub">Nothing is sent anywhere. That also means nothing is backed up. Clearing your
+      browser data, or losing the phone, loses the lot. Export every few months and email the file
+      to yourself.</p>
+    <button class="cta" id="exp">Export everything</button>
+    <h2 class="h">Restore</h2>
+    <p class="hsub">Loading a backup replaces what's here now.</p>
+    <button class="ghost" id="impb" style="width:100%">Choose a backup file</button>
+    <input type="file" accept="application/json" id="imp" style="display:none">
+    <p class="foot">Course search uses OpenStreetMap under the ODbL licence. ${S.order.length} courses
+      ranked${photosNote()}.</p>`;
+  document.getElementById("exp").onclick = exportAll;
+  document.getElementById("impb").onclick = () => document.getElementById("imp").click();
+  document.getElementById("imp").onchange = (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = async () => {
+      try {
+        const j = JSON.parse(rd.result);
+        S = { entries: j.entries || {}, order: j.order || [] };
+        for (const [k, v] of Object.entries(j.photos || {})) await DB.set("ph:" + k, v);
+        await save(); tab = "rank"; render();
+      } catch (err) { alert("That file didn't parse as a Played backup."); }
+    };
+    rd.readAsText(f);
+  };
+}
+function photosNote() { return ""; }
+
+async function exportAll() {
+  const photosOut = {};
+  for (const id of S.order) {
+    const p = await DB.get("ph:" + id);
+    if (p) photosOut[id] = p;
+  }
+  const blob = new Blob([JSON.stringify({ ...S, photos: photosOut, exported: new Date().toISOString() })],
+    { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "played-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* --------------------------------- boot ---------------------------------- */
+document.querySelectorAll("nav button").forEach((b) =>
+  b.onclick = () => { tab = b.dataset.tab; view = null; flow = null; render(); });
+
+DB.get("state").then((s) => { if (s) S = s; render(); }).catch(() => render());
+</script>
+</body>
+</html>
